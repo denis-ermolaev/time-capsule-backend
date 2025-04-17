@@ -1,0 +1,8 @@
+body {
+    display: grid;
+    justify-content:center
+}
+
+.time_p {
+    text-align: center;
+}

@@ -13,6 +13,14 @@
             {{ form.as_p }}
             <input type="submit" value="Send" >
         </form>
+
+            {% for capsule in capsules %}
+                    <a href="detail/{{capsule.id}}">
+                        Название: {{ capsule.title }}, Открыть после: {{ capsule.opening_after_date }}, Дата создания: {{ capsule.create_data }}
+                    </a>
+            {% endfor %}
+            {% include 'pagination.html' with page=capsules %}
+
     {% else %}
         <p>You are not logged in</p>
         <p><a href="{% url 'loginCustom' %}">Log In</a></p>

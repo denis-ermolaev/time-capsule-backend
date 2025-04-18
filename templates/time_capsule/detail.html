@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p><a href="{% url 'homepage' %}">Назад</a></p>
+    <p>Это детальное описание капсулы {{capsule}}</p>
+    <p>Она была создана {{capsule.create_data}}</p>
+    <p>Она откроется после {{capsule.opening_after_date}}</p>
+    {% if can_open %}
+        <details>
+            <summary>Капсулу можно открыть</summary>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Send" >
+            </form>
+        </details>
+    {% else %}
+        <p>Капсулу нельзя открыть</p>
+    {% endif %}
+{% endblock content %}

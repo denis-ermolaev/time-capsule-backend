@@ -8,9 +8,14 @@
         {% csrf_token %}
         <a href="#" onclick="parentNode.submit();">Log Out</a>
     </form>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Send" >
+        </form>
     {% else %}
         <p>You are not logged in</p>
-        <a href="{% url 'loginCustom' %}">Log In</a>
+        <p><a href="{% url 'loginCustom' %}">Log In</a></p>
         <p><a href="{% url 'signup' %}">Sign up</a></p>
     {% endif %}
 {% endblock content %}

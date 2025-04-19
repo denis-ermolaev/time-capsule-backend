@@ -2,16 +2,20 @@
 
 {% block content %}
     <p class="time_p">{% now 'Текущая дата: d.m.y' %}</p>
+
+    
     {% if user.is_authenticated %}
-        Hi {{ user.username }}!
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <a href="#" onclick="parentNode.submit();">Log Out</a>
-    </form>
+        <div class="user_menu">
+                <p>Hi {{ user.username }}!</p>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <a href="#" onclick="parentNode.submit();">Log Out</a>
+            </form>
+        </div>
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" value="Send" >
+            <input type="submit" value="Send" id="send_form_create_capsul">
         </form>
 
             {% for capsule in capsules %}

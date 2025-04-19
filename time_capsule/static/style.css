@@ -1,8 +1,50 @@
 body {
     display: grid;
-    justify-content:center
+    margin: 0px;
+    background-color:rgb(211, 211, 211)
+}
+
+.main_container {
+    max-width: 500px;
+    justify-self: center;
+    background-color: rgb(240, 240, 240);
+    padding: 20px;
+    box-shadow: 10px 5px 5px rgb(128, 128, 128);
+    margin: 20px;
 }
 
 .time_p {
     text-align: center;
+}
+
+a {
+    color: black;
+    padding: 10px 20px;
+    display: block;
+}
+
+form>p {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+p>input {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: auto;
+}
+
+#send_form_create_capsul {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.user_menu {
+    max-width: 150px;
+    margin-right: auto;
+}
+.user_menu>p {
+    margin: auto;
+    padding: 0px 20px;
 }

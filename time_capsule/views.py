@@ -22,27 +22,50 @@ from django.contrib.auth.decorators import login_required
 
 from django.shortcuts import redirect
 
+
+import subprocess
+import base64
+import codecs
+
 @login_required
 def get_capsule_detail(request, num):
     if request.method == 'POST':
         capsule = Capsules.objects.filter(user=request.user).get(id=num)
         form = CapsulesForm(request.POST, instance=capsule)
+        # TODO: тут по идее должен быть функционал создания новой капсулы
         if form.is_valid():
             form.save()
+            print("ID текущей капсулы:",capsule.id)
+            print("form.cleaned_data['text'].encode()", form.cleaned_data['text'].encode())
+            print("base64.b64encode(form.cleaned_data['text'].encode()", base64.b64encode(form.cleaned_data['text'].encode()))
+            result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(capsule.id)} --create "{base64.b64encode(form.cleaned_data['text'].encode())}" "{str(form.cleaned_data['opening_after_date'])[0:19]}" {str(form.cleaned_data['emergency_access'])} {str(form.cleaned_data['ea_time'])} {str(form.cleaned_data['ea_separation'])}',shell=True, check=True, capture_output = True, text=True)
+            #result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(new_capsules_row.id)} --create "{codecs.encode(form.cleaned_data['text'])}" "{str(form.cleaned_data['opening_after_date'])[0:19]}" {str(form.cleaned_data['emergency_access'])} {str(form.cleaned_data['ea_time'])} {str(form.cleaned_data['ea_separation'])}',shell=True, check=True, capture_output = True, text=True)
+
+            print(result)
+            
             return redirect(to='/detail/'+str(num))
 
     else:
         capsule = Capsules.objects.filter(user=request.user).get(id=num)
-        if timezone.now() > capsule.opening_after_date: # True, если капсулу уже можно открыть
-            # TODO: тут проверка реально ли капсулу можно открыть или возможно дата в django была изменена
-            # Если можно надо добавить форму для изменения
-            capsulesform = CapsulesForm(instance=capsule)
-            return render(request,
-                  'time_capsule/detail.html', {"capsule":capsule,"can_open":True,"form":capsulesform})
-        else:
-            return render(request,
-                  'time_capsule/detail.html', {"capsule":capsule, "can_open":False})
-# Create your views here.
+        result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(capsule.id)} --read',shell=True, check=True, capture_output = True, text=True)
+        capsule_answer = result.stdout
+        hanler_text_decode = capsule_answer.split('\n')
+        #if 
+        #capsule_answer = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+        print(hanler_text_decode)
+        form = False
+        if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
+            hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+            form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+        if 'Капсула может быть открыта' in hanler_text_decode:
+            hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+            form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+            
+        capsule_answer = "\n".join(hanler_text_decode)
+        print(hanler_text_decode)
+        return render(request,
+                  'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form})
+
 def get_home_page(request):
     def draw_homepage(request):
         if str(request.user) != "AnonymousUser":
@@ -79,9 +102,22 @@ def get_home_page(request):
             new_capsules_row = Capsules(user = request.user, 
                                         title = form.cleaned_data['title'],
                                         create_data = timezone.now(), 
-                                        opening_after_date = form.cleaned_data['opening_after_date'])
+                                        opening_after_date = form.cleaned_data['opening_after_date'],
+                                        public_access = form.cleaned_data['public_access'],
+                                        emergency_access = form.cleaned_data['emergency_access'],
+                                        ea_time = form.cleaned_data['ea_time'],
+                                        ea_separation = form.cleaned_data['ea_separation'],
+                                        )
             new_capsules_row.save()
             print("ID текущей капсулы:",new_capsules_row.id)
+            print("form.cleaned_data['text'].encode()", form.cleaned_data['text'].encode())
+            print("base64.b64encode(form.cleaned_data['text'].encode()", base64.b64encode(form.cleaned_data['text'].encode()))
+            var1 = base64.b64encode(form.cleaned_data['text'].encode())
+            print("Декодированная строка в байтах ?", base64.b64decode(var1))
+            result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(new_capsules_row.id)} --create "{base64.b64encode(form.cleaned_data['text'].encode())}" "{str(form.cleaned_data['opening_after_date'])[0:19]}" {str(form.cleaned_data['emergency_access'])} {str(form.cleaned_data['ea_time'])} {str(form.cleaned_data['ea_separation'])}',shell=True, check=True, capture_output = True, text=True)
+            #result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(new_capsules_row.id)} --create "{codecs.encode(form.cleaned_data['text'])}" "{str(form.cleaned_data['opening_after_date'])[0:19]}" {str(form.cleaned_data['emergency_access'])} {str(form.cleaned_data['ea_time'])} {str(form.cleaned_data['ea_separation'])}',shell=True, check=True, capture_output = True, text=True)
+
+            print(result)
             print("Форма сохранена")
         return draw_homepage(request)
     else:  

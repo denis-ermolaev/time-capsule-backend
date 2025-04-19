@@ -15,6 +15,11 @@ class LoginForm(AuthenticationForm):
 class CapsulesForm(forms.ModelForm):
     opening_after_date = forms.DateTimeField(widget=forms.TextInput(attrs={"type": "datetime-local"}))
     text = forms.CharField(widget=forms.Textarea)
+    
+    ea_time = forms.IntegerField(min_value=0,max_value=336,
+                                 step_size=1, initial=0, label="Кол-во часов до открытия экстренного доступа")
+    ea_separation = forms.IntegerField(min_value=1,max_value=20,
+                                       step_size=1, initial=1, label="Кол-во раз, когда нужно подтвердить доступ")
     class Meta:
         model = Capsules # Указание модели
-        fields = ['title', 'opening_after_date']
+        fields = ['title', 'opening_after_date', "public_access", "emergency_access", "ea_time", "ea_separation"]

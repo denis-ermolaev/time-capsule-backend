@@ -46,9 +46,6 @@ function closure_passing_arguments(func, ...args) {
     return inner
 }
 
-get_time(el);
-console.log(el);
-
 let timerId = setInterval(closure_passing_arguments(get_time, el), 5000);
 
 

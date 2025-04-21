@@ -1,0 +1,4 @@
+.venv
+capsules
+time_capsule/migrations
+db.sqlite3

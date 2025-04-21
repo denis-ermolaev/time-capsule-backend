@@ -34,52 +34,52 @@ def api_get_private_capsule(request):
     def is_ajax(request):
         return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     
-    if is_ajax(request): # "Type-Capsule": typeCapsule, // "Private" "Public"
+    if is_ajax(request): # "Type-Capsule": typeCapsule, // "Private" "Public" request.GET.get('open')
         if str(request.user) != "AnonymousUser":
+            print("request.GET", request.GET)
+            print("request.GET.get('typeCapsule')", request.GET.get('typeCapsule'))
+            if request.GET.get('typeCapsule') == 'Private':
+                print(request.GET.get('sorted_by'), type(request.GET.get('sorted_by')))
+                capsules_list = Capsules.objects.filter(user=request.user).order_by(request.GET.get('sorted_by'))
+            else:
+                capsules_list = Capsules.objects.filter(public_access=True).order_by(request.GET.get('sorted_by')) # Тут может быть ошибка
+                
+            if request.GET.get('search'):
+                capsules_list = capsules_list.filter(title__icontains=request.GET.get('search'))
+            paginator = Paginator(capsules_list, 10)
+            page_number = int(request.GET.get('page'))
+            print("page_number", page_number)
             try:
-                print("request.headers.get('sorted_by')", request.headers.get('Search'))
-                if request.headers.get('Type-Capsule') == 'Private':
-                    capsules_list = Capsules.objects.filter(user=request.user).order_by(request.headers.get('Sorted'))
-                else:
-                    capsules_list = Capsules.objects.filter(public_access=True).order_by(request.headers.get('Sorted')) # Тут может быть ошибка
-                    
-                if request.headers.get('Search'):
-                    capsules_list = capsules_list.filter(title__icontains=request.headers.get('Search'))
-                paginator = Paginator(capsules_list, 10)
-                page_number = request.GET.get('page')
-                try:
-                    capsules = paginator.page(page_number)
-                except PageNotAnInteger:
-                # Если page_number не целое число, то
-                # выдать первую страницу
-                    capsules = paginator.page(1)
-                except EmptyPage:
-                # Если page_number находится вне диапазона, то
-                # выдать последнюю страницу результатов
-                    capsules = paginator.page(paginator.num_pages)
-                page_num = str(capsules)
-                result_list = []
-                previous_page_number = capsules.has_previous()
-                next_page_number = capsules.has_next()
-                current_num_page = capsules.number
-                num_all_page = paginator.num_pages
-                print("num_all_page", num_all_page)
-                for capsule in capsules:
-                    result_list.append([str(capsule.title),str(capsule.opening_after_date), str(capsule.create_data), str(capsule.id)])
-                print(page_num, type(page_num))
-                print(result_list, type(result_list[0]))
-                return JsonResponse({
-                    'capsules_page': page_num,
-                    "capsules": result_list,
-                    "previous_page_number": previous_page_number,
-                    "next_page_number": next_page_number,
-                    "current_num_page": current_num_page,
-                    "num_all_page": num_all_page
-                }, status=200)
-            except:
-                return JsonResponse({
-                    'capsules': False,
-                }, status=404)
+                capsules = paginator.page(page_number)
+            except PageNotAnInteger:
+            # Если page_number не целое число, то
+            # выдать первую страницу
+                capsules = paginator.page(1)
+            except EmptyPage:
+            # Если page_number находится вне диапазона, то
+            # выдать последнюю страницу результатов
+                capsules = paginator.page(paginator.num_pages)
+            page_num = str(capsules)
+            result_list = []
+            previous_page_number = capsules.has_previous()
+            next_page_number = capsules.has_next()
+            current_num_page = capsules.number
+            num_all_page = paginator.num_pages
+            for capsule in capsules:
+                result_list.append([str(capsule.title),str(capsule.opening_after_date), str(capsule.create_data), str(capsule.id)])
+            return JsonResponse({
+                'capsules_page': page_num,
+                "capsules": result_list,
+                "previous_page_number": previous_page_number,
+                "next_page_number": next_page_number,
+                "current_num_page": current_num_page,
+                "num_all_page": num_all_page
+            }, status=200)
+            # except:
+            #     print("api_get_private_capsule возвращает 404")
+            #     return JsonResponse({
+            #         'capsules': False,
+            #     }, status=404)
         else:
             return JsonResponse({
                 'capsules': False,
@@ -128,17 +128,21 @@ def get_capsule_detail(request, num):
             form = False
             
             if str(request.user) == str(capsule.user):
-                form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+                user_can_delete = True
             if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
                 hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+                if str(request.user) == str(capsule.user):
+                    form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
             if 'Капсула может быть открыта' in hanler_text_decode:
                 hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-                    
+                if str(request.user) == str(capsule.user):
+                    form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+            
                 
             capsule_answer = "\n".join(hanler_text_decode)
             print(hanler_text_decode)
             return render(request,
-                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form, "current_url":'/detail/'+str(num)})
+                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form, "current_url":'/detail/'+str(num),"user_can_delete":user_can_delete})
         else:
             capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
             return render(request,
@@ -220,3 +224,9 @@ class CustomLoginView(LoginView):
 
         # В противном случае сеанс браузера будет таким же как время сеанса cookie "SESSION_COOKIE_AGE", определенное в settings.py
         return super(CustomLoginView, self).form_valid(form)
+    
+    
+def delete(request, id):
+    capsule = Capsules.objects.get(user=request.user , id=id)
+    capsule.delete()
+    return redirect(to = 'homepage')

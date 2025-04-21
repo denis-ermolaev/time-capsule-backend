@@ -50,14 +50,19 @@ let timerId = setInterval(closure_passing_arguments(get_time, el), 5000);
 
 
 async function get_post(num_page, typeCapsule, sorted_by, search) {
-    let url = `/api/get_private_capsule?page=${num_page}`;
+    // "Type-Capsule": typeCapsule, // "Private" "Public"
+    //         "sorted": sorted_by,
+    //         "Search": search,
+    const params = new URLSearchParams();
+    params.append("search", search);
+    params.append("typeCapsule", typeCapsule);
+    params.append("sorted_by", sorted_by,);
+    params.append("page", num_page);
+    let url = `/api/get_private_capsule?${params}`
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            "Type-Capsule": typeCapsule, // "Private" "Public"
-            "sorted": sorted_by,
-            "Search": search,
         }
     });
     console.log("sorted_by", sorted_by);
@@ -75,6 +80,9 @@ let init_capsules_list = async (num_page, typeCapsule, sorted_by, search) => {
     let serachField = document.getElementById("capsule-search");
     serachButton.onclick = function() {
         console.log("serachField.value", serachField.value);
+        console.log("result.current_num_page", result.current_num_page);
+        console.log("typeCapsule", typeCapsule);
+        console.log("sorted_by", sorted_by);
         console.log("Запуск поиска",init_capsules_list(result.current_num_page, typeCapsule, sorted_by, serachField.value))
     };
 

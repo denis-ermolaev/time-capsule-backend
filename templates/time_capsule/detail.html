@@ -21,9 +21,14 @@
             <form method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input type="submit" value="Изменить" >
+                <div class="submit-delete-container">
+                    <input type="submit" value="Изменить" >
+                    <a href="{% url "delete_page" capsule.id %}" id="delete_button">Удалить</a>
+                </div>
             </form>
-        </details>      
+        </details>
+        {% elif user_can_delete %}
+            <a href="{% url "delete_page" capsule.id %}" id="delete_button_only">Удалить</a>
         {% endif %}
     </div>
     <hr>

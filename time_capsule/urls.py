@@ -10,4 +10,6 @@ urlpatterns = [
     path('detail/<int:num>', views.get_capsule_detail,  name='detailcapsule'),
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", CustomLoginView.as_view(redirect_authenticated_user=True, template_name='registration/login.html'), name="loginCustom"),
+    path('api/get_time', views.api_get_time,  name='api_get_time'),
+    path('api/get_private_capsule', views.api_get_private_capsule,  name='api_get_private_capsule'),
 ]

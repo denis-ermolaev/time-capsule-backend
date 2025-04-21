@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<p><a href="{% url 'homepage' %}">Назад</a></p>
+<p><a class="nav_back" href="{% url 'homepage' %}">Назад</a></p>
     <h2> Login </h2>
     <form method="post">
         {{ form.as_p }}

@@ -1,33 +1,54 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p class="time_p">{% now 'Текущая дата: d.m.y' %}</p>
-
-    
     {% if user.is_authenticated %}
         <div class="user_menu">
-                <p>Hi {{ user.username }}!</p>
+                <p>Привет {{ user.username }}!</p>
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <a href="#" onclick="parentNode.submit();">Log Out</a>
+                <a href="#" onclick="parentNode.submit();">Выйти</a>
             </form>
         </div>
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" value="Send" id="send_form_create_capsul">
+            <input type="submit" value="Создать" id="send_form_create_capsul">
         </form>
-
-            {% for capsule in capsules %}
-                    <a href="detail/{{capsule.id}}">
-                        Название: {{ capsule.title }}, Открыть после: {{ capsule.opening_after_date }}, Дата создания: {{ capsule.create_data }}
-                    </a>
-            {% endfor %}
-            {% include 'pagination.html' with page=capsules %}
+            <div class="field_above_capsule_list">
+                    <a id="PrivateCapsule" class="capsule_type_selected">Личные Капсулы Времени</a>
+                    <a id="PublicCapsule">Публичные Капсулы Времени</a>
+                <div class="search_menu">
+                    <input type="text" id="capsule-search"/>
+                    <button id="capsule-search-button">Поиск</button>
+                </div>
+            </div>
+            <div class="container_capsules">
+                {% comment %}
+                <!-- {% if capsules %}
+                    <div class="table_capsule_title">
+                    </div>
+                    {% for capsule in capsules %}
+                            <a class="linkOnDetailCapsule" href="detail/{{capsule.id}}">
+                                <div>{{ capsule.title }}</div>
+                                <div>{{ capsule.opening_after_date }}</div>
+                                <div>{{ capsule.create_data }}</div>
+                            </a>
+                    {% endfor %}
+                
+                {% include 'pagination.html' with page=capsules %}
+                {% endif %} -->
+                {% endcomment %}
+            </div>
 
     {% else %}
-        <p>You are not logged in</p>
-        <p><a href="{% url 'loginCustom' %}">Log In</a></p>
-        <p><a href="{% url 'signup' %}">Sign up</a></p>
+        <p>Для использования сайта, требуется войти</p>
+        <p><a href="{% url 'loginCustom' %}">Войти</a></p>
+        <p><a href="{% url 'signup' %}">Зарегестрироваться</a></p>
+        <h1>Капсулы времени</h2>
+            <p>На этом сайты вы можете создать капусулу времени, это какой-либо текст, к которому можно будет получить доступ, только после определённого времени или с помощью экстренного доступа</p>
+            <p>Также вы можете создать капсулу времени с общественным доступом, которую может посмотреть любуй пользователь</p>
+            <p>Зачем это надо ? Для сохранения каких-то мыслей, которые вы считается важными сейчас и хотите передать их для себя в будущем, сохранение важной информации, которую вам нужно будет получить потом</p>
+            <p>Все капсулы шифруются</p>
     {% endif %}
+    <hr>
 {% endblock content %}

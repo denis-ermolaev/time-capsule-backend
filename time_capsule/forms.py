@@ -13,9 +13,11 @@ class LoginForm(AuthenticationForm):
     
     
 class CapsulesForm(forms.ModelForm):
-    opening_after_date = forms.DateTimeField(widget=forms.TextInput(attrs={"type": "datetime-local"}))
-    text = forms.CharField(widget=forms.Textarea)
-    
+    title = forms.CharField(label="Название капсулы")
+    opening_after_date = forms.DateTimeField(widget=forms.TextInput(attrs={"type": "datetime-local"}), label="Откроется после")
+    text = forms.CharField(widget=forms.Textarea, label="Текст капсулы")
+    public_access = forms.BooleanField(label="Публичный доступ")
+    emergency_access = forms.BooleanField(label="Экстренный доступ")
     ea_time = forms.IntegerField(min_value=0,max_value=336,
                                  step_size=1, initial=0, label="Кол-во часов до открытия экстренного доступа")
     ea_separation = forms.IntegerField(min_value=1,max_value=20,

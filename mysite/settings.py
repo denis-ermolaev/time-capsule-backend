@@ -127,5 +127,7 @@ LOGIN_REDIRECT_URL = '/' # Редирект после входа
 LOGOUT_REDIRECT_URL = "/" # Редирект после выхода
 LOGIN_URL = '/login/'
 
+REGISTRATION_REDIRECT_URL = '/login/'
+
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30 # Куки для запоминания входа в аккаунт, 30 дней вроде
 

@@ -1,22 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p><a href="{% url 'homepage' %}">Назад</a></p>
-    <p>Это детальное описание капсулы {{capsule}}</p>
-    <p>Она была создана {{capsule.create_data}}</p>
-    <p>Она откроется после {{capsule.opening_after_date}}</p>
-    <textarea rows="15" cols="44">{{ capsule_answer }}</textarea>
+    <p><a class="nav_back" href="{% url 'homepage' %}">Назад</a></p>
 
-    {% if form %}
-    <details>
-        <summary>Изменить данные капсулы времени (Пока не реализовано)</summary>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Send" >
-        </form>
-    </details>      
-    {% endif %}
+    <div class="details_main">
+        <p>Это детальное описание капсулы {{capsule}}</p>
+        <p>Она была создана {{capsule.create_data}}</p>
+        <p>Она откроется после {{capsule.opening_after_date}}</p>
+
+        
+        <a id="open-capsule-in-detail" href="{{current_url}}?open">Открыть капсулу</a>
+        {% if capsule_answer %}
+            <textarea rows="15" cols="44">{{ capsule_answer }}</textarea>
+        {% endif %}
+        
+
+        {% if form %}
+        <details>
+            <summary>Изменить данные капсулы времени</summary>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Изменить" >
+            </form>
+        </details>      
+        {% endif %}
+    </div>
+    <hr>
     
 
 {% endblock content %}

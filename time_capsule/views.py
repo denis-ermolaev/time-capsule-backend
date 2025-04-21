@@ -27,10 +27,84 @@ import subprocess
 import base64
 import codecs
 
+from django.http import JsonResponse
+
+@login_required
+def api_get_private_capsule(request):
+    def is_ajax(request):
+        return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    if is_ajax(request): # "Type-Capsule": typeCapsule, // "Private" "Public"
+        if str(request.user) != "AnonymousUser":
+            try:
+                print("request.headers.get('sorted_by')", request.headers.get('Search'))
+                if request.headers.get('Type-Capsule') == 'Private':
+                    capsules_list = Capsules.objects.filter(user=request.user).order_by(request.headers.get('Sorted'))
+                else:
+                    capsules_list = Capsules.objects.filter(public_access=True).order_by(request.headers.get('Sorted')) # Тут может быть ошибка
+                    
+                if request.headers.get('Search'):
+                    capsules_list = capsules_list.filter(title__icontains=request.headers.get('Search'))
+                paginator = Paginator(capsules_list, 10)
+                page_number = request.GET.get('page')
+                try:
+                    capsules = paginator.page(page_number)
+                except PageNotAnInteger:
+                # Если page_number не целое число, то
+                # выдать первую страницу
+                    capsules = paginator.page(1)
+                except EmptyPage:
+                # Если page_number находится вне диапазона, то
+                # выдать последнюю страницу результатов
+                    capsules = paginator.page(paginator.num_pages)
+                page_num = str(capsules)
+                result_list = []
+                previous_page_number = capsules.has_previous()
+                next_page_number = capsules.has_next()
+                current_num_page = capsules.number
+                num_all_page = paginator.num_pages
+                print("num_all_page", num_all_page)
+                for capsule in capsules:
+                    result_list.append([str(capsule.title),str(capsule.opening_after_date), str(capsule.create_data), str(capsule.id)])
+                print(page_num, type(page_num))
+                print(result_list, type(result_list[0]))
+                return JsonResponse({
+                    'capsules_page': page_num,
+                    "capsules": result_list,
+                    "previous_page_number": previous_page_number,
+                    "next_page_number": next_page_number,
+                    "current_num_page": current_num_page,
+                    "num_all_page": num_all_page
+                }, status=200)
+            except:
+                return JsonResponse({
+                    'capsules': False,
+                }, status=404)
+        else:
+            return JsonResponse({
+                'capsules': False,
+            }, status=404)
+
+    return redirect(to='homepage')
+    
+
+def api_get_time(request):
+    def is_ajax(request):
+        return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    if is_ajax(request):
+        return JsonResponse({
+            'time_now': str(timezone.localtime()),
+        }, status=200)
+
+    return redirect(to='homepage')
+
 @login_required
 def get_capsule_detail(request, num):
+    print(request.GET.get('open') is not None)
     if request.method == 'POST':
-        capsule = Capsules.objects.filter(user=request.user).get(id=num)
+        #capsule = Capsules.objects.filter(user=request.user).get(id=num)
+        capsule = get_object_or_404(Capsules, user=request.user, id=num)
         form = CapsulesForm(request.POST, instance=capsule)
         # TODO: тут по идее должен быть функционал создания новой капсулы
         if form.is_valid():
@@ -44,27 +118,31 @@ def get_capsule_detail(request, num):
             print(result)
             
             return redirect(to='/detail/'+str(num))
-
     else:
-        capsule = Capsules.objects.filter(user=request.user).get(id=num)
-        result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(capsule.id)} --read',shell=True, check=True, capture_output = True, text=True)
-        capsule_answer = result.stdout
-        hanler_text_decode = capsule_answer.split('\n')
-        #if 
-        #capsule_answer = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-        print(hanler_text_decode)
-        form = False
-        if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
-            hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-            form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
-        if 'Капсула может быть открыта' in hanler_text_decode:
-            hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-            form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+        if request.GET.get('open') is not None:
+            capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
+            result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(capsule.id)} --read',shell=True, check=True, capture_output = True, text=True)
+            capsule_answer = result.stdout
+            hanler_text_decode = capsule_answer.split('\n')
+            print(hanler_text_decode)
+            form = False
             
-        capsule_answer = "\n".join(hanler_text_decode)
-        print(hanler_text_decode)
-        return render(request,
-                  'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form})
+            if str(request.user) == str(capsule.user):
+                form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
+            if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
+                hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+            if 'Капсула может быть открыта' in hanler_text_decode:
+                hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
+                    
+                
+            capsule_answer = "\n".join(hanler_text_decode)
+            print(hanler_text_decode)
+            return render(request,
+                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form, "current_url":'/detail/'+str(num)})
+        else:
+            capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
+            return render(request,
+                    'time_capsule/detail.html', {"capsule":capsule, "current_url":'/detail/'+str(num)})
 
 def get_home_page(request):
     def draw_homepage(request):
@@ -126,7 +204,7 @@ def get_home_page(request):
     
 class SignUpView(generic.CreateView):
     form_class = UserCreationForm
-    success_url = reverse_lazy("login")
+    success_url = reverse_lazy("loginCustom")
     template_name = "registration/signup.html"
 
 class CustomLoginView(LoginView):

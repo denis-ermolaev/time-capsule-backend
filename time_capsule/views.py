@@ -129,6 +129,8 @@ def get_capsule_detail(request, num):
             
             if str(request.user) == str(capsule.user):
                 user_can_delete = True
+            else:
+                user_can_delete = False
             if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
                 hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
                 if str(request.user) == str(capsule.user):

@@ -175,3 +175,9 @@ let container_capsules = document.querySelectorAll('.container_capsules')[0];
 if (container_capsules) {
     init_capsules_list(1, typeCapsule="Private", sorted_by="-create_data", search = ""); // "Private" "Public"
 }
+
+
+let deleteButton = document.getElementById("delete_button_only")
+deleteButton.onclick = function() {
+    let sure = confirm("Удалить капсулу времени ?");
+}

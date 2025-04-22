@@ -5,6 +5,10 @@ body {
     color: rgba(255, 255, 255, 0.747);
 }
 
+a {
+    cursor: pointer;
+}
+
 .main_container {
     width: 60%;
     justify-self: center;

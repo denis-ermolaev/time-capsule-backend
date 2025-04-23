@@ -28,7 +28,7 @@ a {
 .time_p {
     text-align: center;
 }
-.nav_back {
+#nav_back {
     padding-top: 18px;
     padding-bottom: 10px;
     padding-left: 20px;

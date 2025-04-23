@@ -1,33 +1,6 @@
 let elements = document.querySelectorAll('.time_p');
 let el = elements[0]
 
-// function create_Date() {
-//     var now = new Date();
-//     let hours = String(now.getHours());
-//     let minutes = String(now.getMinutes()); // В случае необходимости добавить 0 в начале
-//     let day = String(now.getDate());
-//     let month = String(now.getMonth() + 1); // С 0 до 11, надо прибавить + 1, в случае необходимости добавить 0 в начало
-//     let year = String(now.getFullYear());
-//     if (minutes.length < 2) {
-//         minutes = "0" + minutes
-//     }
-//     if (month.length < 2) {
-//         month = "0" + month
-//     }
-//     if (hours.length < 2) {
-//         hours = "0" + hours
-//     }
-//     if (day.length < 2) {
-//         console.log(day)
-//         day = "0" + day
-//     }
-//     result = day + "." + month   + "." + year + " " + hours + ":" + minutes
-//     el.innerText = "Текущее время: " + result
-// }
-
-// create_Date();
-// let timerId = setInterval(create_Date, 5000);
-
 async function get_time(el, typeCapsule) {
     let url = "/api/get_time";
     const response = await fetch(url, {
@@ -176,8 +149,33 @@ if (container_capsules) {
     init_capsules_list(1, typeCapsule="Private", sorted_by="-create_data", search = ""); // "Private" "Public"
 }
 
+let deleteButtonOnly = document.getElementById("delete_button_only");
+if ( !(document.querySelector("#details-detail")) && document.querySelector("#textarea-detail") && deleteButtonOnly){
+    deleteButtonOnly.onclick = function(event) {
+        event.preventDefault()
+        let sure = confirm("Удалить капсулу времени ?");
+        if (sure){
+            location.assign(this.href);
+        }
+    }    
+}
 
-let deleteButton = document.getElementById("delete_button_only")
-deleteButton.onclick = function() {
-    let sure = confirm("Удалить капсулу времени ?");
+let deleteButton = document.getElementById("delete_button");
+if (deleteButton){
+    deleteButton.onclick = function(event) {
+        event.preventDefault()
+        let sure = confirm("Удалить капсулу времени ?");
+        if (sure){
+            location.assign(this.href);
+        }
+    } 
+}
+
+
+// Страница detail
+let nav_back = document.getElementById("nav_back");
+if (nav_back){
+    nav_back.onclick = function(){
+        history.back();
+    }
 }

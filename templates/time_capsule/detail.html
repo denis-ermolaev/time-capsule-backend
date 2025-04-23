@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p><a class="nav_back" href="{% url 'homepage' %}">Назад</a></p>
+    <p><a id="nav_back">Назад</a></p>
 
     <div class="details_main">
         <p>Это детальное описание капсулы {{capsule}}</p>
@@ -11,12 +11,12 @@
         
         <a id="open-capsule-in-detail" href="{{current_url}}?open">Открыть капсулу</a>
         {% if capsule_answer %}
-            <textarea rows="15" cols="44">{{ capsule_answer }}</textarea>
+            <textarea id="textarea-detail" rows="15" cols="44">{{ capsule_answer }}</textarea>
         {% endif %}
         
 
         {% if form %}
-        <details>
+        <details id="details-detail">
             <summary>Изменить данные капсулы времени</summary>
             <form method="POST">
                 {% csrf_token %}

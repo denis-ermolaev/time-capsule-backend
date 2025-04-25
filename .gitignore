@@ -2,4 +2,5 @@
 capsules
 time_capsule/migrations
 db.sqlite3
-*/__pycache__
+mysite/__pycache__
+time_capsule/__pycache__

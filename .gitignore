@@ -2,3 +2,4 @@
 capsules
 time_capsule/migrations
 db.sqlite3
+*/__pycache__

@@ -49,22 +49,22 @@ let init_capsules_list = async (num_page, typeCapsule, sorted_by, search) => {
     let container_capsules = document.querySelectorAll('.container_capsules')[0];
     let table_capsule_title = document.createElement("div");
 
-    // let serachButton = document.getElementById("capsule-search-button");
+    let serachButton = document.getElementById("capsule-search-button");
     let serachField = document.getElementById("capsule-search");
-    serachField.oninput = function() {
-        console.log("serachField.value", serachField.value);
-        console.log("result.current_num_page", result.current_num_page);
-        console.log("typeCapsule", typeCapsule);
-        console.log("sorted_by", sorted_by);
-        console.log("Запуск поиска",init_capsules_list(result.current_num_page, typeCapsule, sorted_by, serachField.value))
-    }
-    // serachButton.onclick = function() {
+    // serachField.oninput = function() {
     //     console.log("serachField.value", serachField.value);
     //     console.log("result.current_num_page", result.current_num_page);
     //     console.log("typeCapsule", typeCapsule);
     //     console.log("sorted_by", sorted_by);
     //     console.log("Запуск поиска",init_capsules_list(result.current_num_page, typeCapsule, sorted_by, serachField.value))
-    // };
+    // }
+    serachButton.onclick = function() {
+        console.log("serachField.value", serachField.value);
+        console.log("result.current_num_page", result.current_num_page);
+        console.log("typeCapsule", typeCapsule);
+        console.log("sorted_by", sorted_by);
+        console.log("Запуск поиска",init_capsules_list(result.current_num_page, typeCapsule, sorted_by, serachField.value))
+    };
 
     let privateCapsule = document.getElementById("PrivateCapsule");
     // privateCapsule.style.textDecoration = "underline white";

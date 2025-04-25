@@ -120,31 +120,39 @@ def get_capsule_detail(request, num):
             return redirect(to='/detail/'+str(num))
     else:
         if request.GET.get('open') is not None:
+            # Первая строка, статус
+            # 1 - Доступ запрещён, капсула не открыта ИЛИ успешное создание капсулы
+            # 2 - Текст получен, по времени или экстренному доступу
+            # 3 - Экстренный доступ, + 1 попытка
+            # 4 - время захода не правильное
+            # 5 - экстренный доступ запрошен, время назначено
+            # print("2")
+            # print(self.final_console_output["text"])
+            
+            # print(self.final_console_output["num_access"])
+            # print(self.final_console_output["start_limit"])
+            # print(self.final_console_output["end_limit"])
             capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
             result = subprocess.run(f'"time_capsule/create_read_capsules/create_read_capsules.exe" {str(capsule.id)} --read',shell=True, check=True, capture_output = True, text=True)
-            capsule_answer = result.stdout
-            hanler_text_decode = capsule_answer.split('\n')
-            print(hanler_text_decode)
+            capsule_answer = result.stdout.split('\n')
             form = False
-            
+            if capsule_answer[0] == "1":
+                ready_capsule_answer = "Капсула не может быть открыта. Т.к. экстренный доступ не настроен, а время открытия не настало"
+            elif capsule_answer[0] == "2":
+                ready_capsule_answer = codecs.decode(base64.b64decode(capsule_answer[1][2:-1].encode()))
+                form = CapsulesForm(instance=capsule, initial={'text':ready_capsule_answer})
+            elif capsule_answer[0] == "3":
+                ready_capsule_answer = f"""Экстренный доступ подтверждён \nОсталось подтверждений: {capsule.ea_separation - int(capsule_answer[1])} \nНовое время подтверждения экстренного доступа \nC {capsule_answer[2]} до {capsule_answer[3]}"""
+            elif capsule_answer[0] == "4":
+                ready_capsule_answer = f"""Вы подтвердили запрос экстренного доступа в неправильное время \nВам назначено новое время подтверждения экстренного доступа \nC {capsule_answer[2]} до {capsule_answer[3]}"""
+            elif capsule_answer[0] == "5":
+                ready_capsule_answer = f"""Вам нужно будет подтвердить запрос экстренного доступа \nДля этого нужно зайти на эту страницу во время: \nC {capsule_answer[2]} до {capsule_answer[3]}"""
             if str(request.user) == str(capsule.user):
                 user_can_delete = True
             else:
                 user_can_delete = False
-            if 'Капсула не может быть отрыта' not in hanler_text_decode and 'Капсула может быть открыта с помощью экстренного доступа. Запускаем экстренный доступ' not in hanler_text_decode:
-                hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-                if str(request.user) == str(capsule.user):
-                    form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
-            if 'Капсула может быть открыта' in hanler_text_decode:
-                hanler_text_decode[-2] = codecs.decode(base64.b64decode(capsule_answer.split('\n')[-2][2:-1].encode()))
-                if str(request.user) == str(capsule.user):
-                    form = CapsulesForm(instance=capsule, initial={'text':hanler_text_decode[-2]})
-            
-                
-            capsule_answer = "\n".join(hanler_text_decode)
-            print(hanler_text_decode)
             return render(request,
-                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":capsule_answer, "form":form, "current_url":'/detail/'+str(num),"user_can_delete":user_can_delete})
+                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":ready_capsule_answer, "form":form, "current_url":'/detail/'+str(num),"user_can_delete":user_can_delete})
         else:
             capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
             return render(request,

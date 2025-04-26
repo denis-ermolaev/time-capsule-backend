@@ -146,7 +146,7 @@ def get_capsule_detail(request, num):
             elif capsule_answer[0] == "4":
                 ready_capsule_answer = f"""Вы подтвердили запрос экстренного доступа в неправильное время \nВам назначено новое время подтверждения экстренного доступа \nC {capsule_answer[2]} до {capsule_answer[3]}"""
             elif capsule_answer[0] == "5":
-                ready_capsule_answer = f"""Вам нужно будет подтвердить запрос экстренного доступа \nДля этого нужно зайти на эту страницу во время: \nC {capsule_answer[2]} до {capsule_answer[3]}"""
+                ready_capsule_answer = f"""Вам нужно будет подтвердить запрос экстренного доступа \nДля этого нужно зайти на эту страницу во время: \nC {capsule_answer[2]} до {capsule_answer[3]} \nЕщё {capsule.ea_separation} раз"""
             if str(request.user) == str(capsule.user):
                 user_can_delete = True
             else:

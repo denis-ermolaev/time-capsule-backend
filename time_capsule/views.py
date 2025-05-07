@@ -117,7 +117,7 @@ def get_capsule_detail(request, num):
 
             print(result)
             
-            return redirect(to='/detail/'+str(num))
+            return redirect(to='/oldversion/detail/'+str(num))
     else:
         if request.GET.get('open') is not None:
             # Первая строка, статус
@@ -152,11 +152,11 @@ def get_capsule_detail(request, num):
             else:
                 user_can_delete = False
             return render(request,
-                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":ready_capsule_answer, "form":form, "current_url":'/detail/'+str(num),"user_can_delete":user_can_delete})
+                      'time_capsule/detail.html', {"capsule":capsule,"capsule_answer":ready_capsule_answer, "form":form, "current_url":'/oldversion/detail/'+str(num),"user_can_delete":user_can_delete})
         else:
             capsule = get_object_or_404(Capsules, id=num) #user=request.user, 
             return render(request,
-                    'time_capsule/detail.html', {"capsule":capsule, "current_url":'/detail/'+str(num)})
+                    'time_capsule/detail.html', {"capsule":capsule, "current_url":'/oldversion/detail/'+str(num)})
 
 def get_home_page(request):
     def draw_homepage(request):

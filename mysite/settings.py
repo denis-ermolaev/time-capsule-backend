@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'time_capsule.apps.TimeCapsuleConfig'
+    'time_capsule.apps.TimeCapsuleConfig',
+    'rest_framework',
+    'time_capsule_api.apps.TimeCapsuleApiConfig'
 ]
 
 MIDDLEWARE = [
@@ -123,11 +125,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/' # Редирект после входа
-LOGOUT_REDIRECT_URL = "/" # Редирект после выхода
-LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/oldversion/' # Редирект после входа
+LOGOUT_REDIRECT_URL = "/oldversion/" # Редирект после выхода
+LOGIN_URL = '/oldversion/login/'
 
-REGISTRATION_REDIRECT_URL = '/login/'
+REGISTRATION_REDIRECT_URL = '/oldversion/login/'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30 # Куки для запоминания входа в аккаунт, 30 дней вроде
 

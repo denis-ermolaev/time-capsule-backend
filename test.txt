@@ -1,0 +1,78 @@
+{
+  "username": "millennium2",
+  "password": "1234"
+}
+
+
+{
+  "title": "Ну первая",
+  "description": "string",
+  "date_open": "2025-06-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}
+
+{
+  "title": "Ну вторая",
+  "description": "string",
+  "date_open": "2025-07-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}
+
+{
+  "title": "Ну третья",
+  "description": "string",
+  "date_open": "2025-08-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}
+
+
+{
+  "title": "Ну четвёртая",
+  "description": "string",
+  "date_open": "2025-09-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}
+
+{
+  "title": "А",
+  "description": "string",
+  "date_open": "2026-09-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}
+
+{
+  "title": "Я",
+  "description": "string",
+  "date_open": "2026-10-09T15:09:04.788Z",
+  "private": false,
+  "emergency_access": true,
+  "ea_after_open": true,
+  "ea_random": true,
+  "ea_random_ratio": 0,
+  "ea_time_separation": "string"
+}

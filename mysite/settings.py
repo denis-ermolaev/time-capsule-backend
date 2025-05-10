@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,8 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'time_capsule.apps.TimeCapsuleConfig',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
+    'drf_spectacular',
+    'time_capsule.apps.TimeCapsuleConfig',
     'time_capsule_api.apps.TimeCapsuleApiConfig'
 ]
 
@@ -133,3 +137,26 @@ REGISTRATION_REDIRECT_URL = '/oldversion/login/'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30 # Куки для запоминания входа в аккаунт, 30 дней вроде
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',   # new
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Time Capsules",  # название проекта
+    "VERSION": "0.0.1",  # версия проекта
+    "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,  # не сбрасывать авторизацию
+    },
+}
+# AUTH_USER_MODEL = "time_capsule_api.UserAPI"

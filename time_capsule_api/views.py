@@ -36,7 +36,9 @@ def encrypt_capsule(capsule, text):
     if capsule.emergency_access:
         args.append("--emergency")
         args.append("true" if capsule.ea_after_open else "false")
-        args.append(f"'{json.dumps(capsule.ea_time_separation)}'")
+        args.append(
+            f'"{json.dumps(capsule.ea_time_separation).replace('"', '\\"')}"'
+        )  # Экраннирование для командной строки windows
     if capsule.opening_days_mode:
         args.append("--opening_days_mode")
         args.append(f'"{capsule.day_week_odm}"')
@@ -165,7 +167,9 @@ class CapsuleView(APIView):
     def get(self, request):
         def filtration(request):
             if request.GET.get("private") == "false":  # Публичная
-                capsules = CapsulesModel.objects.filter(private=False)
+                capsules = CapsulesModel.objects.filter(private=False).defer(
+                    "share_password"
+                )
             else:
                 capsules = CapsulesModel.objects.filter(user=request.user)
 
@@ -274,6 +278,7 @@ class CapsuleView(APIView):
         pagination = self.Pagination()
         queryset = pagination.paginate_queryset(queryset=capsules_list, request=request)
         data = self.serializer_class(queryset, many=True)
+        print("data", data)
         return pagination.get_paginated_response(data.data)
 
     def post(self, request):
@@ -314,6 +319,24 @@ class CapsuleDetailView(APIView):
     @extend_schema(
         parameters=[
             OpenApiParameter(
+                name="id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Получить данные капсулы по ID",
+            ),
+            OpenApiParameter(
+                name="share_link",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Получить данные капсулы по уникальному коду капсулы. (Ещё нужен пароль)",
+            ),
+            OpenApiParameter(
+                name="share_password",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="пароль для получения доступа",
+            ),
+            OpenApiParameter(
                 name="tryOpenCapsule",
                 type=bool,
                 location=OpenApiParameter.QUERY,
@@ -321,16 +344,60 @@ class CapsuleDetailView(APIView):
             ),
         ]
     )
-    def get(self, request, id):
+    def get(self, request):
         if request.user.is_anonymous:
             return Response(
                 {"error": "Доступно только зарегестрированным пользователям"},
                 status=401,
             )
-        capsule = self.get_by_id(id)
+        if request.GET.get("id"):
+            capsule = self.get_by_id(request.GET.get("id"))
+        elif request.GET.get("share_link") and request.GET.get("share_password"):
+            try:
+                capsule = CapsulesModel.objects.get(
+                    share_link=request.GET.get("share_link"),
+                    share_password=request.GET.get("share_password"),
+                )
+            except ObjectDoesNotExist:
+                return Response(
+                    data={"error": "Такой капсулы нет. Неправильный пароль или ссылка"},
+                    status=404,
+                )
 
         serializer = self.serializer_class(capsule)
-        if capsule.private or capsule.user_id == request.user:
+        if capsule.user_id == request.user.username:
+            if request.GET.get("tryOpenCapsule"):
+                responce_encrypt_capsule = open_encrypt_capsule(capsule)
+                return Response(
+                    data={
+                        "message": serializer.data,
+                        "result": responce_encrypt_capsule,
+                    },
+                    status=201,
+                )
+            else:
+                return Response(
+                    data={"message": serializer.data},
+                    status=201,
+                )
+        elif not capsule.private:
+            if request.GET.get("tryOpenCapsule"):
+                responce_encrypt_capsule = open_encrypt_capsule(capsule)
+                return Response(
+                    data={
+                        "message": serializer.data,
+                        "result": responce_encrypt_capsule,
+                    },
+                    status=201,
+                )
+            else:
+                return Response(
+                    data={"message": serializer.data},
+                    status=201,
+                )
+        elif capsule.share_password == request.GET.get(
+            "share_password"
+        ) and capsule.share_link == request.GET.get("share_link"):
             if request.GET.get("tryOpenCapsule"):
                 responce_encrypt_capsule = open_encrypt_capsule(capsule)
                 return Response(
@@ -348,25 +415,36 @@ class CapsuleDetailView(APIView):
         else:
             return Response(data={"error": "У вас нет права доступа"}, status=403)
 
-    def patch(self, request, id):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Получить данные капсулы по ID",
+            ),
+        ]
+    )
+    def patch(self, request):
         if request.user.is_anonymous:
             return Response(
                 {"error": "Доступно только зарегестрированным пользователям"},
                 status=401,
             )
-        capsule = self.get_by_id(id)
+        capsule = self.get_by_id(request.GET.get("id"))
         if isinstance(capsule, Response):
             return capsule
-
+        print(request.__dict__)
         text = request.data["text_bd"]
         request.data["text_bd"] = ""
         serializer = self.serializer_class(capsule, data=request.data, partial=True)
-
+        print(capsule.user_id, request.user.username)
         if capsule.user_id != request.user.username:
+            print(capsule.user_id, request.user.username)
             return Response(data={"error": "У вас нет права доступа"}, status=403)
         elif serializer.is_valid():
             serializer.save()
-            capsule = self.get_by_id(id)
+            capsule = self.get_by_id(id=request.GET.get("id"))
             result = encrypt_capsule(capsule, text)
             return Response(
                 data={"message": serializer.data, "result": result}, status=201
@@ -374,7 +452,7 @@ class CapsuleDetailView(APIView):
         else:
             return Response(data={"error": serializer.errors}, status=400)
 
-    def delete(self, request, id):
+    def delete(self, request):
         capsule = self.get_by_id(id)
         if capsule.user_id == request.user:
             capsule.delete()
@@ -385,11 +463,6 @@ class CapsuleDetailView(APIView):
 
 class StatisticslView(APIView):
     def get(self, request):
-        if request.user.is_anonymous:
-            return Response(
-                {"error": "Доступно только зарегестрированным пользователям"},
-                status=401,
-            )
         datetime_now = datetime.datetime.now()
         cache_timeout: datetime.timedelta = (
             datetime.datetime.now().replace(
@@ -453,3 +526,26 @@ class StatisticslView(APIView):
             },
             status=200,
         )
+
+
+class InfoView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="get_user_name",
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                description="Запрос имени пользователя",
+            ),
+        ]
+    )
+    def get(self, request):
+        if request.user.is_anonymous:
+            return Response(
+                {"error": "Доступно только зарегестрированным пользователям"},
+                status=401,
+            )
+        response = {}
+        if request.GET.get("get_user_name"):
+            response["user_name"] = request.user.username
+        return Response(response, 201)

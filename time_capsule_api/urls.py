@@ -4,6 +4,7 @@ from time_capsule_api.views import (
     RegisterAPIView,
     CapsuleDetailView,
     StatisticslView,
+    InfoView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -17,6 +18,7 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("capsules", CapsuleView.as_view(), name="capsule-list"),
-    path("capsules/<int:id>", CapsuleDetailView.as_view(), name="capsule-detail"),
+    path("capsule", CapsuleDetailView.as_view(), name="capsule-detail"),
     path("statistics", StatisticslView.as_view(), name="statistics"),
+    path("info", InfoView.as_view(), name="info"),
 ]

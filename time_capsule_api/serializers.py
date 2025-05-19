@@ -123,6 +123,7 @@ class CapsulesSerializer(serializers.ModelSerializer):
             "content_rating_ai": {"read_only": True},
             "content_rating": {"read_only": True},
             "share_link": {"read_only": True},
+            "text_bd": {"required": True},
         }
 
     def validate_ea_time_separation(self, value: list) -> list:

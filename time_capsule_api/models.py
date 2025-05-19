@@ -9,7 +9,11 @@ import datetime
 class CapsulesModel(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=100)
-    description = models.CharField(max_length=1000)
+    description = models.CharField(
+        max_length=1000,
+        blank=True,
+        null=True,
+    )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="capsulesAPI", to_field="username"
     )
@@ -31,8 +35,8 @@ class CapsulesModel(models.Model):
 
     private = models.BooleanField(default=True)
 
-    # Если капсула публичная она и так доступна по ссылке, но
-    # Если включен этот режим приватная тоже, но нужен ещё пароль
+    # Для частных капсул можно установить share режим, чтобы
+    # Делится капсулой по ссылке и паролю
     share_mode = models.BooleanField(default=False)
     share_link = models.CharField(
         max_length=255,
